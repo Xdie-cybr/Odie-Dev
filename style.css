@@ -52,6 +52,11 @@ a:focus-visible {
     background: rgba(248, 250, 251, .94);
     border-bottom: 1px solid rgba(220, 228, 232, .8);
     backdrop-filter: blur(12px);
+    transition: transform .25s ease;
+}
+
+.site-header.is-hidden {
+    transform: translateY(-100%);
 }
 
 .nav-wrapper {
@@ -664,13 +669,6 @@ h1 span {
         justify-content: center;
     }
 
-    .site-header {
-        transition: transform .25s ease;
-    }
-
-    .site-header.is-hidden {
-        transform: translateY(-100%);
-    }
 }
 
 @media (prefers-reduced-motion: reduce) {

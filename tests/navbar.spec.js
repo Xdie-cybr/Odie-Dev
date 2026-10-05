@@ -10,28 +10,41 @@ test('navbar dan brand tampil', async ({ page }) => {
     await expect(brand).toBeVisible();
 });
 
-test('navbar mobile tersembunyi saat scroll ke bawah dan muncul saat scroll ke atas', async ({ page }) => {
+test('navbar mobile mengikuti aktivitas scroll dan timeout hide', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('http://127.0.0.1:8000');
 
     const navbar = page.locator('.site-header');
 
     await expect(navbar).toBeVisible();
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
 
     await page.evaluate(() => {
+        document.documentElement.style.scrollBehavior = 'auto';
         window.scrollTo(0, 500);
     });
 
-    await page.waitForTimeout(250);
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(500);
+    await expect(navbar).not.toHaveClass(/is-hidden/);
 
+    await page.waitForTimeout(1000);
+    await expect(navbar).not.toHaveClass(/is-hidden/);
+
+    await page.waitForTimeout(700);
     await expect(navbar).toHaveClass(/is-hidden/);
 
     await page.evaluate(() => {
-        window.scrollTo(0, 200);
+        window.scrollTo(0, 700);
     });
 
-    await page.waitForTimeout(250);
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(700);
+    await expect(navbar).not.toHaveClass(/is-hidden/);
 
+    await page.evaluate(() => {
+        window.scrollTo(0, 0);
+    });
+
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
     await expect(navbar).not.toHaveClass(/is-hidden/);
 });
 

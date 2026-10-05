@@ -1,49 +1,45 @@
 const siteHeader = document.querySelector('.site-header');
-const mobileBreakpoint = window.matchMedia('(max-width: 560px)');
-const scrollThreshold = 8;
-const scrollStopDelay = 180;
+const scrollStopDelay = 1500;
+const navbarRevealZone = 24;
+const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
 
-let lastScrollPosition = window.scrollY;
 let scrollStopTimer;
-let isScrollSessionActive = false;
 
-// Satu timer dipakai untuk menandai akhir aktivitas scroll.
-function scheduleScrollStop() {
+function showNavbar() {
+    siteHeader.classList.remove('is-hidden');
+}
+
+function updateNavbarOnScroll() {
+    if (!siteHeader) {
+        return;
+    }
+
+    showNavbar();
     clearTimeout(scrollStopTimer);
+
+    if (window.scrollY === 0) {
+        return;
+    }
+
     scrollStopTimer = setTimeout(() => {
-        isScrollSessionActive = false;
+        if (window.scrollY !== 0) {
+            siteHeader.classList.add('is-hidden');
+        }
     }, scrollStopDelay);
 }
 
-function updateMobileNavbar() {
-    if (!siteHeader || !mobileBreakpoint.matches) {
-        clearTimeout(scrollStopTimer);
-        siteHeader?.classList.remove('is-hidden');
-        lastScrollPosition = window.scrollY;
-        isScrollSessionActive = false;
+function revealNavbarNearTop(event) {
+    if (
+        !siteHeader
+        || !finePointer.matches
+        || event.pointerType !== 'mouse'
+        || event.clientY > navbarRevealZone
+    ) {
         return;
     }
 
-    const currentScrollPosition = window.scrollY;
-    const scrollDifference = currentScrollPosition - lastScrollPosition;
-
-    scheduleScrollStop();
-
-    if (Math.abs(scrollDifference) < scrollThreshold) {
-        return;
-    }
-
-    if (!isScrollSessionActive) {
-        siteHeader.classList.remove('is-hidden');
-        isScrollSessionActive = true;
-    } else if (currentScrollPosition <= 16 || scrollDifference < 0) {
-        siteHeader.classList.remove('is-hidden');
-    } else {
-        siteHeader.classList.add('is-hidden');
-    }
-
-    lastScrollPosition = currentScrollPosition;
+    showNavbar();
 }
 
-window.addEventListener('scroll', updateMobileNavbar, { passive: true });
-window.addEventListener('resize', updateMobileNavbar);
+window.addEventListener('scroll', updateNavbarOnScroll, { passive: true });
+window.addEventListener('pointermove', revealNavbarNearTop, { passive: true });
